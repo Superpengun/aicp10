@@ -47,6 +47,12 @@ public class MainActivity extends Activity {
 
 	private HciSdk sdk;
 	private TextView tv_logview;
+	private final Runnable scrollLog = new Runnable() {
+		@Override
+		public void run() {
+			((ScrollView) tv_logview.getParent()).fullScroll(ScrollView.FOCUS_DOWN);
+		}
+	};
 	private Spinner sp_mode;
 	private FreetalkStream ft_stream;
 	private FreetalkShortAudio ft_shortaudio;
@@ -56,57 +62,6 @@ public class MainActivity extends Activity {
 	private ImageView iv_cancel;
 	private int ft_mode;
 	private boolean session_busy = false;
-	private boolean operating = false;
-
-	static private HciSdk createSdk(Context context) {
-		String path = Environment.getExternalStorageDirectory().getAbsolutePath();
-		path = path + File.separator + context.getPackageName();
-
-		File file = new File(path);
-		if (!file.exists()) {
-			file.mkdirs();
-		}
-
-		HciSdk sdk = new HciSdk();
-		HciSdkConfig cfg = new HciSdkConfig();
-		// 平台为应用分配的 appkey
-		cfg.setAppkey("aicp_app");
-		// 应用对象的密钥 (敏感信息，请勿公开)
-		cfg.setSecret("QWxhZGRpbjpvcGVuIHNlc2FtZQ");
-		cfg.setSysUrl("https://10.1.18.101:8801/");
-		cfg.setCapUrl("http://10.1.18.101:8800/");
-		cfg.setDataPath(path);
-		cfg.setVerifySSL(false);
-
-		Log.i("sdk-config", cfg.toString());
-
-		sdk.init(cfg, context);
-		return sdk;
-	}
-
-	private FreetalkConfig freetalkConfig() {
-		FreetalkConfig config = new FreetalkConfig();
-		config.setProperty("cn_16k_common");
-		config.setAudioFormat("pcm_s16le_16k");
-		config.setMode(ft_mode);
-		config.setAddPunc(true);
-		config.setInterimResults(interim_results);
-		config.setSlice(200);
-		config.setTimeout(10000);
-		Log.w("config", config.toString());
-		return config;
-	}
-
-	private ShortAudioConfig shortAudioConfig() {
-		ShortAudioConfig config = new ShortAudioConfig();
-		config.setProperty("cn_16k_common");
-		config.setAudioFormat("pcm_s16le_16k");
-		config.setMode(ft_mode);
-		config.setAddPunc(true);
-		config.setTimeout(10000);
-		return config;
-	}
-
 	private final IFreetalkHandler handler = new IFreetalkHandler() {
 		@Override
 		public void onStart(FreetalkStream s, int code, Warning[] warnings) {
@@ -142,6 +97,56 @@ public class MainActivity extends Activity {
 			printLog("FreetalkStream 识别结果，sentence = " + sentence.toString());
 		}
 	};
+	private boolean operating = false;
+
+	static private HciSdk createSdk(Context context) {
+		String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+		path = path + File.separator + context.getPackageName();
+
+		File file = new File(path);
+		if (!file.exists()) {
+			file.mkdirs();
+		}
+
+		HciSdk sdk = new HciSdk();
+		HciSdkConfig cfg = new HciSdkConfig();
+		// 平台为应用分配的 appkey
+		cfg.setAppkey("aicp_app");
+		// 应用对象的密钥 (敏感信息，请勿公开)
+		cfg.setSecret("QWxhZGRpbjpvcGVuIHNlc2FtZQ");
+		cfg.setSysUrl("https://10.0.1.186:22801");
+		cfg.setCapUrl("http://10.0.1.186:22800");
+		cfg.setDataPath(path);
+		cfg.setVerifySSL(false);
+
+		Log.i("sdk-config", cfg.toString());
+
+		sdk.init(cfg, context);
+		return sdk;
+	}
+
+	private FreetalkConfig freetalkConfig() {
+		FreetalkConfig config = new FreetalkConfig();
+		config.setProperty("cn_16k_common");
+		config.setAudioFormat("pcm_s16le_16k");
+		config.setMode(ft_mode);
+		config.setAddPunc(true);
+		config.setInterimResults(interim_results);
+		config.setSlice(200);
+		config.setTimeout(10000);
+		Log.w("config", config.toString());
+		return config;
+	}
+
+	private ShortAudioConfig shortAudioConfig() {
+		ShortAudioConfig config = new ShortAudioConfig();
+		config.setProperty("cn_16k_common");
+		config.setAudioFormat("pcm_s16le_16k");
+		config.setMode(ft_mode);
+		config.setAddPunc(true);
+		config.setTimeout(10000);
+		return config;
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -323,13 +328,6 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	private final Runnable scrollLog = new Runnable() {
-		@Override
-		public void run() {
-			((ScrollView) tv_logview.getParent()).fullScroll(ScrollView.FOCUS_DOWN);
-		}
-	};
 
 	private void printLog(final String detail) {
 		runOnUiThread(new Runnable() {

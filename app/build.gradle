@@ -19,4 +19,5 @@ android {
 
 dependencies {
     compile files('libs/hci.jar')
+    compile files('libs/hci.jar')
 }
